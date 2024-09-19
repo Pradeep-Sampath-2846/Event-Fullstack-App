@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: psql
+      POSTGRES_PASSWORD: psql
+      POSTGRES_DB: event-db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5433"
+    networks:
+      - app-network
+
+  backend:
+    image: pradeepsampath95/eventapp:latest
+    container_name: backend-container
+    ports:
+      - "8085:8085"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/event-db
+      SPRING_DATASOURCE_USERNAME: psql
+      SPRING_DATASOURCE_PASSWORD: psql
+    networks:
+      - app-network
+
+  frontend:
+    image: pradeepsampath95/frontend-app:latest
+    container_name: frontend-container
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+
+volumes:
+  postgres-data:
